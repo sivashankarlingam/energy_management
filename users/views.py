@@ -244,7 +244,12 @@ import os
 import pandas as pd
 from django.conf import settings
 
+from django.shortcuts import render, HttpResponse, redirect
+
 def prediction(request):
+    if not request.session.get('loginid'):
+        return redirect('UserLogin')
+    
     hours = list(range(24))
 
     # ✅ Load features from file (VERY IMPORTANT)
