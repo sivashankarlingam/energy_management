@@ -1,0 +1,84 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}Edit User — EMS Admin{% endblock %}
+{% block user_list %}active{% endblock %}
+
+{% block content %}
+<style>
+    .edit-wrapper { max-width: 600px; margin: 0 auto; }
+    .edit-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .edit-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--cyan-primary), var(--emerald));
+    }
+    .edit-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+    .edit-icon {
+        width: 50px; height: 50px;
+        background: rgba(0,200,255,0.1);
+        border: 1px solid rgba(0,200,255,0.2);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.25rem; color: var(--cyan-primary);
+    }
+    .form-label-ems { font-size: 0.75rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; display: block; }
+    .form-control-ems {
+        width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+        padding: 0.85rem 1rem; font-size: 0.95rem; color: var(--text-primary); transition: all 0.3s ease; outline: none;
+    }
+    .form-control-ems:focus { border-color: var(--cyan-primary); background: rgba(0,200,255,0.03); box-shadow: 0 0 0 3px rgba(0,200,255,0.1); }
+    .btn-save {
+        width: 100%; background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-dark)); border: none; border-radius: 12px;
+        padding: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--navy-900); cursor: pointer;
+        transition: all 0.3s ease; box-shadow: 0 5px 20px var(--cyan-glow); margin-top: 1rem;
+    }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,200,255,0.5); }
+    .btn-cancel {
+        display: block; text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); text-decoration: none; transition: color 0.3s ease;
+    }
+    .btn-cancel:hover { color: var(--text-primary); }
+</style>
+
+<div class="edit-wrapper animate__animated animate__fadeInUp">
+    <div class="edit-card">
+        <div class="edit-header">
+            <div class="edit-icon"><i class="fas fa-user-pen"></i></div>
+            <div>
+                <h2 style="font-family:'Orbitron'; font-size:1.4rem; margin:0;">Edit User</h2>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">ID: {{ user.loginid }}</p>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="form-label-ems">Full Name</label>
+                <input type="text" name="name" value="{{ user.name }}" class="form-control-ems" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label-ems">Email Address</label>
+                <input type="email" name="email" value="{{ user.email }}" class="form-control-ems" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label-ems">Mobile Number</label>
+                <input type="text" name="mobile" value="{{ user.mobile }}" class="form-control-ems" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label-ems">Locality</label>
+                <input type="text" name="locality" value="{{ user.locality }}" class="form-control-ems" required>
+            </div>
+
+            <button type="submit" class="btn-save">Save Changes</button>
+            <a href="{% url 'ViewRegisteredUsers' %}" class="btn-cancel">Cancel and Go Back</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

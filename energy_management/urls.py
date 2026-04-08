@@ -48,6 +48,8 @@ urlpatterns = [
     path("AdminHome/", admins.AdminHome, name="AdminHome"),
     path("ViewRegisteredUsers/", admins.ViewRegisteredUsers, name="ViewRegisteredUsers"),
     path("AdminActivaUsers/", admins.AdminActivaUsers, name="AdminActivaUsers"),
+    path("AdminDeleteUser/", admins.AdminDeleteUser, name="AdminDeleteUser"),
+    path("AdminEditUser/", admins.AdminEditUser, name="AdminEditUser"),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
