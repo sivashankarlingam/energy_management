@@ -32,6 +32,7 @@ urlpatterns = [
     path("UserRegister/", mainView.UserRegister, name="UserRegister"),
     path("AdminLogin/", mainView.AdminLogin, name="AdminLogin"),
     path("UserLogin/", mainView.UserLogin, name="UserLogin"),
+    path("logout/", mainView.logout, name="logout"),
 
     ### User Side Views
     path("UserRegisterActions/", usr.UserRegisterActions, name="UserRegisterActions"),
