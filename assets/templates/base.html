@@ -270,28 +270,52 @@
             width: 60%;
         }
 
+        .btn-navbar {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-navbar-outline {
+            color: var(--text-secondary);
+            border: 1px solid rgba(0, 200, 255, 0.25);
+            margin: 0 4px;
+        }
+
+        .btn-navbar-outline:hover, .btn-navbar-outline.active {
+            color: var(--cyan-primary);
+            border-color: var(--cyan-primary);
+            background: rgba(0, 200, 255, 0.08);
+            text-shadow: 0 0 10px var(--cyan-glow);
+        }
+
         .btn-register {
             background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
             color: var(--navy-900) !important;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 0.8rem;
             font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            padding: 0.5rem 1.4rem;
-            border-radius: 25px;
-            border: none;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
+            margin-left: 8px;
             box-shadow: 0 4px 15px var(--cyan-glow);
         }
 
         .btn-register:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 25px rgba(0, 200, 255, 0.5);
-            color: var(--navy-900) !important;
             filter: brightness(1.1);
+        }
+
+        @media (min-width: 992px) {
+            .navbar-collapse-ems {
+                display: block !important;
+            }
         }
 
         /* =============================================
@@ -660,24 +684,24 @@
                 <!-- Nav Links -->
                 <div class="collapse navbar-collapse-ems" id="navbarCollapse">
                     <ul class="nav-ems">
-                        <li class="nav-item {% block home_page %}{% endblock %}">
-                            <a class="nav-link" href="{% url 'home' %}">
-                                <i class="fas fa-house me-1 opacity-75"></i> Home
-                            </a>
-                        </li>
-                        <li class="nav-item {% block user_login %}{% endblock %}">
-                            <a class="nav-link" href="{% url 'UserLogin' %}">
-                                <i class="fas fa-user me-1 opacity-75"></i> User
-                            </a>
-                        </li>
-                        <li class="nav-item {% block admin_login %}{% endblock %}">
-                            <a class="nav-link" href="{% url 'AdminLogin' %}">
-                                <i class="fas fa-shield-halved me-1 opacity-75"></i> Admin
+                        <li class="nav-item">
+                            <a class="btn-navbar btn-navbar-outline {% block home_page %}{% endblock %}" href="{% url 'home' %}">
+                                <i class="fas fa-house opacity-75"></i> Home
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn-register ms-2" href="{% url 'UserRegister' %}">
-                                <i class="fas fa-user-plus me-1"></i> Register
+                            <a class="btn-navbar btn-navbar-outline {% block user_login %}{% endblock %}" href="{% url 'UserLogin' %}">
+                                <i class="fas fa-user opacity-75"></i> User Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn-navbar btn-navbar-outline {% block admin_login %}{% endblock %}" href="{% url 'AdminLogin' %}">
+                                <i class="fas fa-shield-halved opacity-75"></i> Admin Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn-navbar btn-register" href="{% url 'UserRegister' %}">
+                                <i class="fas fa-user-plus"></i> Register
                             </a>
                         </li>
                     </ul>
