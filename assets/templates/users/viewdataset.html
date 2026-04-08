@@ -1,0 +1,243 @@
+{% extends 'users/userbase.html' %}
+{% load static %}
+
+{% block title %}View Dataset — EMS{% endblock %}
+{% block dataset_active %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Page Header ── */
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+        animation: fade-in 0.5s ease forwards;
+    }
+
+    @keyframes fade-in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    .page-header-icon {
+        width: 58px; height: 58px;
+        background: linear-gradient(135deg, rgba(0,200,255,0.12), rgba(16,232,128,0.08));
+        border: 1px solid rgba(0,200,255,0.2);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: var(--cyan-primary);
+        box-shadow: 0 0 22px var(--cyan-glow);
+    }
+
+    .page-header h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.3rem, 4vw, 2rem);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.3rem;
+    }
+
+    .page-header p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+    /* ── Dataset Card ── */
+    .dataset-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        overflow: hidden;
+        animation: fade-in 0.6s ease forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    .dataset-card-header {
+        padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        background: rgba(0,200,255,0.03);
+    }
+
+    .dataset-card-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dataset-card-title .dot {
+        width: 4px; height: 18px;
+        background: linear-gradient(180deg, var(--cyan-primary), var(--emerald));
+        border-radius: 2px;
+    }
+
+    .dataset-tag {
+        background: rgba(16,232,128,0.08);
+        border: 1px solid rgba(16,232,128,0.2);
+        color: var(--emerald);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+
+    .dataset-card-body {
+        padding: 2rem;
+        overflow-x: auto;
+    }
+
+    /* ── Pre (raw data) + DataTable override ── */
+    pre {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        line-height: 1.6;
+        white-space: pre;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        background: rgba(0,0,0,0.15);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    /* DataTables core overrides */
+    .dataTables_wrapper .dataTables_filter label,
+    .dataTables_wrapper .dataTables_length label {
+        color: var(--text-secondary);
+        font-size: 0.82rem;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        padding-top: 1rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        padding-top: 1rem;
+    }
+
+    table.dataTable {
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+
+    table.dataTable thead th {
+        background: rgba(0,200,255,0.06);
+        color: var(--cyan-primary);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    table.dataTable tbody tr {
+        background: transparent;
+        border-bottom: 1px solid rgba(0,200,255,0.04);
+        transition: background 0.2s ease;
+    }
+
+    table.dataTable tbody tr:hover {
+        background: rgba(0,200,255,0.04);
+    }
+
+    table.dataTable tbody td {
+        padding: 11px 16px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .dataTables_filter input,
+    .dataTables_length select {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px !important;
+        color: var(--text-primary) !important;
+        padding: 6px 12px !important;
+        outline: none !important;
+        font-family: 'Exo 2', sans-serif !important;
+    }
+
+    .dataTables_filter input:focus,
+    .dataTables_length select:focus {
+        border-color: var(--cyan-primary) !important;
+    }
+
+    .dataTables_paginate .paginate_button {
+        color: var(--text-secondary) !important;
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        border-radius: 8px !important;
+        padding: 4px 10px !important;
+        font-size: 0.82rem !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .dataTables_paginate .paginate_button:hover {
+        background: rgba(0,200,255,0.08) !important;
+        color: var(--cyan-primary) !important;
+        border-color: var(--border-subtle) !important;
+    }
+
+    .dataTables_paginate .paginate_button.current,
+    .dataTables_paginate .paginate_button.current:hover {
+        background: rgba(0,200,255,0.15) !important;
+        color: var(--cyan-primary) !important;
+        border-color: rgba(0,200,255,0.25) !important;
+    }
+
+    .dataTables_paginate .paginate_button.disabled {
+        color: var(--text-muted) !important;
+    }
+
+    @media (max-width: 576px) {
+        .dataset-card-body { padding: 1rem; }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-icon"><i class="fas fa-database"></i></div>
+    <div>
+        <h1>Dataset View</h1>
+        <p>Explore the full training dataset — search, filter and paginate</p>
+    </div>
+</div>
+
+<!-- Dataset Card -->
+<div class="dataset-card">
+    <div class="dataset-card-header">
+        <div class="dataset-card-title">
+            <span class="dot"></span>
+            Energy Dataset
+        </div>
+        <span class="dataset-tag"><i class="fas fa-circle-check me-1"></i> Loaded</span>
+    </div>
+
+    <div class="dataset-card-body">
+        <!-- Django renders {{ data|safe }} — could be a table or pre block -->
+        <pre>{{ data|safe }}</pre>
+    </div>
+</div>
+
+<script>
+    // Init DataTables if a table is present
+    $(document).ready(function () {
+        if ($('table').length) {
+            $('table').DataTable({ pageLength: 50, responsive: true });
+        }
+    });
+</script>
+{% endblock %}

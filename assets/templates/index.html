@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Energy Management System{% endblock %}
+{% block home_page %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Energy Section ── */
+    .energy-info-section {
+        padding: 60px 20px;
+        position: relative;
+    }
+
+    .section-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--emerald);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-label::before {
+        content: '';
+        display: inline-block;
+        width: 30px;
+        height: 2px;
+        background: var(--emerald);
+        border-radius: 2px;
+    }
+
+    .info-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        padding: 3rem 3.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--cyan-primary), var(--emerald), var(--cyan-primary));
+        background-size: 200% 100%;
+        animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+        to { background-position: -200% 0; }
+    }
+
+    .info-card:hover {
+        border-color: rgba(0, 200, 255, 0.25);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4), 0 0 40px var(--cyan-glow);
+    }
+
+    .info-card h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        line-height: 1.25;
+    }
+
+    .info-card h1 span {
+        background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .info-card p {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+        line-height: 1.85;
+        margin-bottom: 2rem;
+        font-weight: 300;
+    }
+
+    .btn-learn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: transparent;
+        border: 1.5px solid var(--cyan-primary);
+        color: var(--cyan-primary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 0.75rem 2rem;
+        border-radius: 30px;
+        text-decoration: none;
+        transition: all 0.35s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-learn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--cyan-primary);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.35s ease;
+        z-index: -1;
+    }
+
+    .btn-learn:hover {
+        color: var(--navy-900);
+        border-color: var(--cyan-primary);
+        box-shadow: 0 6px 25px var(--cyan-glow);
+    }
+
+    .btn-learn:hover::before { transform: scaleX(1); }
+
+    /* ── Visual Stats Row ── */
+    .stats-row {
+        margin-top: 3rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 16px;
+        background: rgba(0, 200, 255, 0.04);
+        border: 1px solid var(--border-subtle);
+        transition: all 0.35s ease;
+    }
+
+    .stat-item:hover {
+        background: rgba(0, 200, 255, 0.08);
+        border-color: rgba(0, 200, 255, 0.2);
+        transform: translateY(-5px);
+    }
+
+    .stat-value {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--cyan-primary);
+        display: block;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .stat-label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 500;
+    }
+
+    /* ── How It Works ── */
+    .how-it-works {
+        padding: 60px 20px;
+    }
+
+    .section-heading {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .step-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 20px;
+        padding: 2rem;
+        position: relative;
+        transition: all 0.4s ease;
+        height: 100%;
+    }
+
+    .step-card:hover {
+        border-color: rgba(0, 200, 255, 0.25);
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .step-number {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 3rem;
+        font-weight: 800;
+        line-height: 1;
+        background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        opacity: 0.6;
+    }
+
+    .step-card h4 {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .step-card p {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .info-card { padding: 2rem 1.5rem; }
+        .stats-row { margin-top: 2rem; }
+    }
+</style>
+
+<!-- ── Energy Info ── -->
+<section class="energy-info-section animate__animated animate__fadeIn">
+    <div class="container-xl">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-8">
+                <div class="info-card">
+                    <div class="section-label">Why It Matters</div>
+                    <h1>Why Optimize <span>Energy Usage</span>?</h1>
+                    <p>
+                        In smart buildings, efficient energy management is the cornerstone of sustainability. Our machine learning platform predicts device usage patterns and optimizes energy allocation in real time — helping you slash waste, cut operational costs, and reduce your carbon footprint.
+                    </p>
+                    <a href="https://ieeexplore.ieee.org/document/9445171/" target="_blank" class="btn-learn">
+                        <i class="fas fa-arrow-up-right-from-square"></i>
+                        Read Research Paper
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="row g-3 stats-row">
+                    <div class="col-6 col-lg-12">
+                        <div class="stat-item animate__animated animate__fadeInRight" style="animation-delay:0.15s">
+                            <span class="stat-value">40%</span>
+                            <span class="stat-label">Energy Saved</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-12">
+                        <div class="stat-item animate__animated animate__fadeInRight" style="animation-delay:0.3s">
+                            <span class="stat-value">3×</span>
+                            <span class="stat-label">Faster Prediction</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-12">
+                        <div class="stat-item animate__animated animate__fadeInRight" style="animation-delay:0.45s">
+                            <span class="stat-value">99%</span>
+                            <span class="stat-label">Uptime</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-12">
+                        <div class="stat-item animate__animated animate__fadeInRight" style="animation-delay:0.6s">
+                            <span class="stat-value">24/7</span>
+                            <span class="stat-label">Monitoring</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── How It Works ── -->
+<section class="how-it-works">
+    <div class="container-xl">
+        <div class="text-center mb-5">
+            <div class="section-label justify-content-center" style="justify-content:center;">Platform Overview</div>
+            <h2 class="section-heading">How The System Works</h2>
+            <p style="color:var(--text-secondary);max-width:500px;margin:0 auto;font-size:0.95rem;">A three-step pipeline that continuously learns and adapts to your building's energy needs.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="step-card animate__animated animate__fadeInUp" style="animation-delay:0.1s">
+                    <div class="step-number">01</div>
+                    <h4>Data Collection</h4>
+                    <p>Real-time sensors gather temperature, occupancy, humidity and device state data from across the building.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card animate__animated animate__fadeInUp" style="animation-delay:0.25s">
+                    <div class="step-number">02</div>
+                    <h4>ML Prediction</h4>
+                    <p>Our trained model predicts optimal device states (Window / AC / Fan) based on current environmental conditions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card animate__animated animate__fadeInUp" style="animation-delay:0.4s">
+                    <div class="step-number">03</div>
+                    <h4>Smart Allocation</h4>
+                    <p>The system automatically allocates energy, eliminates waste, and reports savings through live dashboards.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

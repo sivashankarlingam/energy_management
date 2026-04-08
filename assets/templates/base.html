@@ -1,0 +1,875 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Optimize energy usage in smart buildings with our machine learning-powered Energy Management System.">
+    <meta name="keywords" content="energy management, smart buildings, device prediction, machine learning">
+    <meta name="author" content="xAI">
+    <title>{% block title %}Energy Management System for Smart Buildings{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+    <style>
+        /* =============================================
+           COLOR SYSTEM — 60/30/10 RULE
+           60% → Deep Navy  (#050d1a, #0a1628, #0f2040)
+           30% → Electric Cyan (#00c8ff, #00a8e8, #64dfff)
+           10% → Emerald Accent (#10e880, #00ff88, #0dcf6e)
+        ============================================= */
+        :root {
+            --navy-900: #050d1a;
+            --navy-800: #0a1628;
+            --navy-700: #0f2040;
+            --navy-600: #162b55;
+            --navy-500: #1e3a6e;
+            --cyan-primary: #00c8ff;
+            --cyan-dark: #0096cc;
+            --cyan-light: #64dfff;
+            --cyan-glow: rgba(0, 200, 255, 0.3);
+            --emerald: #10e880;
+            --emerald-dark: #0dcf6e;
+            --emerald-glow: rgba(16, 232, 128, 0.3);
+            --text-primary: #e8f4ff;
+            --text-secondary: #8ab4d4;
+            --text-muted: #4a7599;
+            --border-subtle: rgba(0, 200, 255, 0.12);
+            --border-glow: rgba(0, 200, 255, 0.4);
+            --glass-bg: rgba(10, 22, 40, 0.85);
+            --glass-hover: rgba(15, 32, 64, 0.95);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --glow-shadow: 0 0 30px rgba(0, 200, 255, 0.2);
+        }
+
+        /* ── Base Reset ── */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: var(--navy-900);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── Animated Grid Background ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 200, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 200, 255, 0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Background Orbs ── */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -30%;
+            right: -20%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+            animation: orb-float 12s ease-in-out infinite;
+        }
+
+        @keyframes orb-float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-40px, 30px) scale(1.05); }
+            66% { transform: translate(30px, -20px) scale(0.95); }
+        }
+
+        .orb-secondary {
+            position: fixed;
+            bottom: -20%;
+            left: -15%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 232, 128, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+            animation: orb-float 16s ease-in-out infinite reverse;
+        }
+
+        /* ── Particles Canvas ── */
+        #particles-js {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Main Wrapper ── */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =============================================
+           NAVBAR
+        ============================================= */
+        .navbar-ems {
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            background: rgba(5, 13, 26, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.75rem 0;
+            transition: all 0.4s ease;
+        }
+
+        .navbar-ems.scrolled {
+            background: rgba(5, 13, 26, 0.98);
+            border-bottom-color: rgba(0, 200, 255, 0.25);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(0, 200, 255, 0.1);
+        }
+
+        .navbar-brand-ems {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--navy-900);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 15px var(--cyan-glow);
+        }
+
+        .navbar-brand-ems:hover .brand-icon {
+            transform: rotate(15deg) scale(1.1);
+            box-shadow: 0 0 25px var(--cyan-glow);
+        }
+
+        .brand-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--cyan-primary);
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px var(--cyan-glow);
+            line-height: 1.1;
+        }
+
+        .brand-sub {
+            font-size: 0.6rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .navbar-toggler-ems {
+            border: 1px solid var(--border-subtle);
+            background: transparent;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler-ems:hover {
+            border-color: var(--cyan-primary);
+            background: rgba(0, 200, 255, 0.08);
+        }
+
+        .navbar-toggler-ems .icon-bar {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text-secondary);
+            margin: 4px 0;
+            border-radius: 2px;
+            transition: all 0.35s ease;
+        }
+
+        /* Nav Links */
+        .nav-ems {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-ems .nav-item .nav-link {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .nav-ems .nav-item .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--cyan-primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .nav-ems .nav-item .nav-link:hover,
+        .nav-ems .nav-item.active .nav-link {
+            color: var(--cyan-primary);
+            background: rgba(0, 200, 255, 0.07);
+            text-shadow: 0 0 10px var(--cyan-glow);
+        }
+
+        .nav-ems .nav-item .nav-link:hover::after,
+        .nav-ems .nav-item.active .nav-link::after {
+            width: 60%;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+            color: var(--navy-900) !important;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 0.5rem 1.4rem;
+            border-radius: 25px;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--cyan-glow);
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 200, 255, 0.5);
+            color: var(--navy-900) !important;
+            filter: brightness(1.1);
+        }
+
+        /* =============================================
+           HERO SECTION
+        ============================================= */
+        .hero-section {
+            padding: 120px 20px 100px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 200, 255, 0.08);
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            color: var(--cyan-primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            animation: pulse-border 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(0, 200, 255, 0.2); box-shadow: none; }
+            50% { border-color: rgba(0, 200, 255, 0.5); box-shadow: 0 0 15px var(--cyan-glow); }
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.2rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 30%, var(--cyan-primary) 60%, var(--emerald) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow-text 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-text {
+            from { filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.4)); }
+            to { filter: drop-shadow(0 0 20px rgba(0, 200, 255, 0.7)); }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        .btn-hero-primary {
+            background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-dark));
+            color: var(--navy-900);
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 0.85rem 2.5rem;
+            border-radius: 30px;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 25px var(--cyan-glow);
+        }
+
+        .btn-hero-primary:hover {
+            color: var(--navy-900);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(0, 200, 255, 0.6);
+        }
+
+        /* =============================================
+           FEATURES SECTION
+        ============================================= */
+        .features-section {
+            padding: 60px 20px;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 200, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 40px var(--cyan-glow);
+        }
+
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin: 0 auto 1.5rem;
+            transition: all 0.4s ease;
+        }
+
+        .feature-icon.cyan {
+            background: rgba(0, 200, 255, 0.1);
+            color: var(--cyan-primary);
+            box-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        .feature-icon.emerald {
+            background: rgba(16, 232, 128, 0.1);
+            color: var(--emerald);
+            box-shadow: 0 0 20px var(--emerald-glow);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.15) rotate(-5deg);
+        }
+
+        .feature-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* =============================================
+           MAIN CONTENT AREA
+        ============================================= */
+        .main-content {
+            flex: 1;
+            padding: 20px 0 60px;
+        }
+
+        /* =============================================
+           FOOTER
+        ============================================= */
+        .footer-ems {
+            background: rgba(5, 13, 26, 0.95);
+            border-top: 1px solid var(--border-subtle);
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            margin: 0 12px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--cyan-primary);
+            transform: translateY(-3px) scale(1.15);
+            text-shadow: 0 0 12px var(--cyan-glow);
+        }
+
+        .footer-ems p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0.5rem 0 0;
+            letter-spacing: 0.5px;
+        }
+
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy-900);
+            font-size: 1rem;
+            text-decoration: none;
+            box-shadow: 0 4px 20px var(--cyan-glow);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+            z-index: 999;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px var(--cyan-glow);
+            color: var(--navy-900);
+        }
+
+        /* =============================================
+           STATUS INDICATOR DOT
+        ============================================= */
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--emerald);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--emerald-glow);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* =============================================
+           DIVIDER
+        ============================================= */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+            margin: 20px 0;
+        }
+
+        /* =============================================
+           RESPONSIVE ADJUSTMENTS
+        ============================================= */
+        @media (max-width: 991px) {
+            .navbar-collapse-ems {
+                background: rgba(5, 13, 26, 0.98);
+                border: 1px solid var(--border-subtle);
+                border-radius: 16px;
+                padding: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            .nav-ems {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .nav-ems .nav-item { width: 100%; }
+            .nav-ems .nav-item .nav-link { display: block; width: 100%; }
+            .btn-register { margin-top: 0.5rem; }
+        }
+
+        @media (max-width: 576px) {
+            .scroll-top { bottom: 20px; right: 20px; }
+        }
+
+        /* =============================================
+           LOADING ANIMATION
+        ============================================= */
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            background: var(--navy-900);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .page-loader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-ring {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-subtle);
+            border-top-color: var(--cyan-primary);
+            border-right-color: var(--emerald);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* WOW.js animate utility */
+        .wow { visibility: hidden; }
+    </style>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div class="page-loader" id="pageLoader">
+    <div class="loader-ring"></div>
+</div>
+
+<div class="orb-secondary"></div>
+<canvas id="particles-js"></canvas>
+
+<div class="page-wrapper">
+
+    <!-- ═══════════════════════════════════════
+         NAVBAR
+    ═══════════════════════════════════════ -->
+    <nav class="navbar-ems" id="mainNav">
+        <div class="container-xl">
+            <div class="d-flex justify-content-between align-items-center">
+
+                <!-- Brand -->
+                <a href="{% url 'home' %}" class="navbar-brand-ems">
+                    <div class="brand-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div>
+                        <span class="brand-text">EMS
+                            <span class="brand-sub">Smart Energy</span>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Mobile Toggle -->
+                <button class="navbar-toggler-ems d-lg-none" type="button" id="navToggle" aria-label="Toggle navigation">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+                <!-- Nav Links -->
+                <div class="collapse navbar-collapse-ems" id="navbarCollapse">
+                    <ul class="nav-ems">
+                        <li class="nav-item {% block home_page %}{% endblock %}">
+                            <a class="nav-link" href="{% url 'home' %}">
+                                <i class="fas fa-house me-1 opacity-75"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item {% block user_login %}{% endblock %}">
+                            <a class="nav-link" href="{% url 'UserLogin' %}">
+                                <i class="fas fa-user me-1 opacity-75"></i> User
+                            </a>
+                        </li>
+                        <li class="nav-item {% block admin_login %}{% endblock %}">
+                            <a class="nav-link" href="{% url 'AdminLogin' %}">
+                                <i class="fas fa-shield-halved me-1 opacity-75"></i> Admin
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn-register ms-2" href="{% url 'UserRegister' %}">
+                                <i class="fas fa-user-plus me-1"></i> Register
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════
+         HERO + FEATURES (Homepage only)
+    ═══════════════════════════════════════ -->
+    {% block hero %}
+    {% if request.path == '/home/' %}
+    <section class="hero-section animate__animated animate__fadeIn">
+        <div class="container">
+            <div class="hero-badge">
+                <span class="status-dot"></span>
+                ML-Powered Platform
+            </div>
+            <h1 class="hero-title">Optimize Energy in<br>Smart Buildings</h1>
+            <p class="hero-subtitle">Harness machine learning to predict device usage and maximize energy efficiency across your entire infrastructure.</p>
+            <a href="{% url 'prediction' %}" class="btn-hero-primary">
+                <i class="fas fa-play me-2"></i>Get Started
+            </a>
+        </div>
+    </section>
+    {% endif %}
+    {% endblock %}
+
+    {% if request.path == '/home/' %}
+    <section class="features-section">
+        <div class="container">
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-4">
+                    <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay:0.1s">
+                        <div class="feature-icon cyan">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>Device Prediction</h3>
+                        <p>Predict optimal device usage (Window, AC, Fan) based on real-time environmental conditions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay:0.25s">
+                        <div class="feature-icon emerald">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h3>Energy Optimization</h3>
+                        <p>Minimize energy waste with intelligent allocation strategies powered by AI.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay:0.4s">
+                        <div class="feature-icon cyan">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Real-Time Analytics</h3>
+                        <p>Monitor and analyze energy usage with dynamic dashboards and live data streams.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ═══════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════ -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ═══════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════ -->
+    <footer class="footer-ems">
+        <div class="container">
+            <div class="footer-links mb-2">
+                <a href="https://x.ai" target="_blank" aria-label="Website"><i class="fas fa-globe"></i></a>
+                <a href="mailto:support@x.ai" aria-label="Email"><i class="fas fa-envelope"></i></a>
+                <a href="https://twitter.com/xAI" target="_blank" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+            </div>
+            <p>© 2025 xAI Energy Management System. All rights reserved.</p>
+        </div>
+    </footer>
+</div>
+
+<!-- Scroll to Top -->
+<a href="#" class="scroll-top" id="scrollTop" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up"></i>
+</a>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery (kept for project compatibility) -->
+<script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+
+<script>
+    // ── Page Loader ──
+    window.addEventListener('load', () => {
+        const loader = document.getElementById('pageLoader');
+        setTimeout(() => loader.classList.add('loaded'), 300);
+    });
+
+    // ── Navbar Scroll Effect ──
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 60);
+        const scrollBtn = document.getElementById('scrollTop');
+        scrollBtn.classList.toggle('visible', window.scrollY > 200);
+    });
+
+    // ── Mobile Nav Toggle ──
+    document.getElementById('navToggle')?.addEventListener('click', () => {
+        const collapse = document.getElementById('navbarCollapse');
+        collapse.classList.toggle('show');
+    });
+
+    // ── Scroll to Top ──
+    document.getElementById('scrollTop')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ── Particle Canvas Background ──
+    (function() {
+        const canvas = document.getElementById('particles-js');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const count = 60;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                r: Math.random() * 2 + 0.5,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                alpha: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0,200,255,${p.alpha})`;
+                ctx.fill();
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            });
+
+            // Draw connecting lines
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0,200,255,${0.08 * (1 - dist/120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+
+    // ── Animate on Scroll (simple IntersectionObserver) ──
+    const animItems = document.querySelectorAll('.animate__animated');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.visibility = 'visible';
+            }
+        });
+    }, { threshold: 0.1 });
+    animItems.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

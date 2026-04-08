@@ -1,0 +1,378 @@
+{% extends 'users/userbase.html' %}
+{% load static %}
+
+{% block title %}Training Results — EMS{% endblock %}
+{% block training_active %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Page Header ── */
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+        animation: fade-in 0.5s ease forwards;
+    }
+
+    @keyframes fade-in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    .page-header-icon {
+        width: 58px; height: 58px;
+        background: linear-gradient(135deg, rgba(0,200,255,0.12), rgba(16,232,128,0.08));
+        border: 1px solid rgba(0,200,255,0.2);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: var(--cyan-primary);
+        box-shadow: 0 0 22px var(--cyan-glow);
+    }
+
+    .page-header h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.3rem, 4vw, 2rem);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.3rem;
+    }
+
+    .page-header p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+    /* ── Section Card ── */
+    .section-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: fade-in 0.6s ease forwards;
+        animation-delay: var(--delay, 0s);
+        opacity: 0;
+    }
+
+    .section-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--cyan-primary), var(--emerald));
+    }
+
+    /* ── Section Titles ── */
+    .card-title-ems {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: 1px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title-ems .title-dot {
+        width: 4px;
+        height: 18px;
+        background: linear-gradient(180deg, var(--cyan-primary), var(--emerald));
+        border-radius: 2px;
+    }
+
+    /* ── Comparison Table ── */
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .comparison-table thead th {
+        background: rgba(0,200,255,0.06);
+        color: var(--cyan-primary);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-subtle);
+        text-align: left;
+    }
+
+    .comparison-table tbody tr {
+        border-bottom: 1px solid rgba(0,200,255,0.05);
+        transition: background 0.25s ease;
+    }
+
+    .comparison-table tbody tr:hover {
+        background: rgba(0,200,255,0.04);
+    }
+
+    .comparison-table tbody td {
+        padding: 14px 18px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .accuracy-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .accuracy-track {
+        flex: 1;
+        height: 6px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .accuracy-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--cyan-primary), var(--emerald));
+        border-radius: 3px;
+        transition: width 1s ease;
+    }
+
+    .accuracy-num {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        white-space: nowrap;
+        min-width: 55px;
+        text-align: right;
+    }
+
+    /* ── Best Model Banner ── */
+    .best-model-banner {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(16,232,128,0.07);
+        border: 1px solid rgba(16,232,128,0.18);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .best-model-icon {
+        width: 44px; height: 44px;
+        background: rgba(16,232,128,0.12);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: var(--emerald);
+        flex-shrink: 0;
+    }
+
+    .best-model-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .best-model-name {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--emerald);
+        text-shadow: 0 0 12px var(--emerald-glow);
+    }
+
+    .best-model-acc {
+        margin-left: auto;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--emerald);
+        text-shadow: 0 0 15px var(--emerald-glow);
+    }
+
+    /* ── Confusion Matrix Images ── */
+    .matrix-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .matrix-item {
+        text-align: center;
+    }
+
+    .matrix-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .matrix-img-wrap {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .matrix-img-wrap:hover {
+        border-color: rgba(0,200,255,0.25);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    .matrix-img-wrap img {
+        width: 100%;
+        display: block;
+        border-radius: 14px;
+    }
+
+    /* ── Report Tables ── */
+    .report-section {
+        margin-bottom: 2rem;
+    }
+
+    .report-model-name {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--cyan-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .report-model-name::before {
+        content: '';
+        width: 20px; height: 2px;
+        background: var(--cyan-primary);
+        border-radius: 1px;
+    }
+
+    /* Override django-generated report tables */
+    .report-section table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .report-section table thead th {
+        background: rgba(0,200,255,0.05);
+        color: var(--cyan-primary);
+        font-size: 0.73rem;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border-subtle);
+        text-align: left;
+    }
+
+    .report-section table tbody tr {
+        border-bottom: 1px solid rgba(0,200,255,0.04);
+        transition: background 0.2s;
+    }
+
+    .report-section table tbody tr:hover { background: rgba(0,200,255,0.03); }
+    .report-section table tbody td { padding: 10px 14px; }
+
+    @media (max-width: 576px) {
+        .section-card { padding: 1.5rem; }
+        .best-model-acc { font-size: 1.2rem; }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-icon"><i class="fas fa-brain"></i></div>
+    <div>
+        <h1>Training Results</h1>
+        <p>Model performance comparison, confusion matrices & classification reports</p>
+    </div>
+</div>
+
+<!-- Comparison Table -->
+<div class="section-card" style="--delay:0.1s">
+    <div class="card-title-ems">
+        <span class="title-dot"></span>
+        Model Accuracy Comparison
+    </div>
+
+    <table class="comparison-table">
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>Accuracy</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr>
+                <td>{{ row.Model }}</td>
+                <td>
+                    <div class="accuracy-bar">
+                        <div class="accuracy-track">
+                            <div class="accuracy-fill" style="width: {{ row.Accuracy }}%"></div>
+                        </div>
+                        <span class="accuracy-num">{{ row.Accuracy }}%</span>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Best Model -->
+    <div class="best-model-banner">
+        <div class="best-model-icon"><i class="fas fa-trophy"></i></div>
+        <div>
+            <div class="best-model-label">Best Model</div>
+            <div class="best-model-name">{{ best_model }}</div>
+        </div>
+        <div class="best-model-acc">{{ best_acc }}%</div>
+    </div>
+</div>
+
+<!-- Confusion Matrices -->
+<div class="section-card" style="--delay:0.25s">
+    <div class="card-title-ems">
+        <span class="title-dot"></span>
+        Confusion Matrices
+    </div>
+    <div class="matrix-grid">
+        {% for name, img in matrices.items %}
+        <div class="matrix-item">
+            <div class="matrix-label">{{ name }}</div>
+            <div class="matrix-img-wrap">
+                <img src="data:image/png;base64,{{ img }}" alt="{{ name }} confusion matrix" loading="lazy">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Classification Reports -->
+<div class="section-card" style="--delay:0.4s">
+    <div class="card-title-ems">
+        <span class="title-dot"></span>
+        Classification Reports
+    </div>
+    {% for name, table in reports.items %}
+    <div class="report-section">
+        <div class="report-model-name">{{ name }}</div>
+        {{ table|safe }}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

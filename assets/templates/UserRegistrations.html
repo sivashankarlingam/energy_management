@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Sign Up{% endblock %}
+{% block user_login %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Register Page Layout ── */
+    .register-page {
+        padding: 50px 20px 80px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .register-wrapper {
+        width: 100%;
+        max-width: 680px;
+        position: relative;
+    }
+
+    .register-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 110%;
+        height: 110%;
+        background: radial-gradient(ellipse, rgba(0, 200, 255, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* ── Register Card ── */
+    .register-card {
+        background: rgba(10, 22, 40, 0.92);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-subtle);
+        border-radius: 28px;
+        padding: 3rem 3rem 2.5rem;
+        position: relative;
+        z-index: 1;
+        transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        animation: card-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes card-enter {
+        from { opacity: 0; transform: translateY(30px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .register-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 28px 28px 0 0;
+        background: linear-gradient(90deg, var(--cyan-primary), var(--emerald), var(--cyan-primary));
+        background-size: 200%;
+        animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .register-card:hover {
+        border-color: rgba(0, 200, 255, 0.2);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 50px rgba(0, 200, 255, 0.07);
+    }
+
+    /* ── Card Header ── */
+    .register-header {
+        text-align: center;
+        margin-bottom: 2.25rem;
+    }
+
+    .register-icon {
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, rgba(0, 200, 255, 0.12), rgba(16, 232, 128, 0.08));
+        border: 1px solid rgba(0, 200, 255, 0.2);
+        border-radius: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--cyan-primary);
+        margin-bottom: 1.25rem;
+        box-shadow: 0 0 30px var(--cyan-glow);
+        transition: transform 0.4s ease;
+    }
+
+    .register-card:hover .register-icon { transform: scale(1.08) rotate(-5deg); }
+
+    .register-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.4rem;
+        letter-spacing: 1px;
+    }
+
+    .register-subtitle {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+    }
+
+    .register-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+        margin: 0 0 2rem;
+    }
+
+    /* ── Section Label Inside Form ── */
+    .form-section-label {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--cyan-primary);
+        opacity: 0.7;
+        margin: 1.75rem 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border-subtle);
+    }
+
+    /* ── Field Label ── */
+    .form-label-ems {
+        font-size: 0.73rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.45rem;
+        display: block;
+    }
+
+    /* ── Input Groups ── */
+    .input-group-ems {
+        position: relative;
+        margin-bottom: 1.25rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        pointer-events: none;
+        transition: color 0.3s ease;
+        z-index: 2;
+    }
+
+    /* ── Django Form Fields Overrides ── */
+    /* These target form widgets rendered by {{ form.field }} */
+    .register-form input[type="text"],
+    .register-form input[type="email"],
+    .register-form input[type="password"],
+    .register-form input[type="tel"],
+    .register-form input[type="number"],
+    .register-form textarea,
+    .register-form select {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.8rem 1rem 0.8rem 2.7rem;
+        font-size: 0.9rem;
+        font-family: 'Exo 2', sans-serif;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .register-form textarea {
+        padding-top: 0.8rem;
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    .register-form select {
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a7599' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 2.5rem;
+    }
+
+    .register-form input[type="text"]:focus,
+    .register-form input[type="email"]:focus,
+    .register-form input[type="password"]:focus,
+    .register-form input[type="tel"]:focus,
+    .register-form textarea:focus,
+    .register-form select:focus {
+        border-color: var(--cyan-primary);
+        background: rgba(0, 200, 255, 0.04);
+        box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.1);
+        color: #fff;
+    }
+
+    .register-form input::placeholder,
+    .register-form textarea::placeholder {
+        color: var(--text-muted);
+        font-style: italic;
+        font-size: 0.85rem;
+    }
+
+    /* Remove Django's default errorlist styling */
+    .register-form ul.errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 4px 0 0;
+    }
+
+    .register-form ul.errorlist li {
+        font-size: 0.78rem;
+        color: #ff8080;
+        padding: 4px 0;
+    }
+
+    /* ── Icon per field type ── */
+    .field-name::before        { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f007'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-loginid::before     { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f2bb'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-email::before       { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f0e0'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-mobile::before      { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f10b'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-password::before    { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f023'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-locality::before    { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f3c5'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-city::before        { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f64f'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-state::before       { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f279'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-status::before      { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f111'; position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+    .field-address::before     { font-family: 'Font Awesome 6 Free'; font-weight: 900; content: '\f015'; position:absolute; left:14px; top:12px; transform:none; color:var(--text-muted); font-size:0.85rem; pointer-events:none; z-index:2; }
+
+    /* address textarea icon is top-aligned */
+    .field-address textarea { padding-left: 2.7rem; }
+
+    /* focus-within icon color change */
+    .input-group-ems:focus-within::before { color: var(--cyan-primary) !important; }
+
+    /* ── Buttons ── */
+    .btn-row {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 2rem;
+    }
+
+    .btn-ems-primary {
+        flex: 1;
+        background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+        border: none;
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--navy-900);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--cyan-glow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-ems-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 200, 255, 0.4);
+        filter: brightness(1.08);
+    }
+
+    .btn-ems-secondary {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 0.9rem 1.5rem;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ems-secondary:hover {
+        border-color: rgba(0, 200, 255, 0.3);
+        color: var(--cyan-primary);
+        background: rgba(0, 200, 255, 0.05);
+    }
+
+    /* ── Messages ── */
+    .auth-messages { margin-top: 1.25rem; }
+
+    .auth-message {
+        background: rgba(255, 80, 80, 0.08);
+        border: 1px solid rgba(255, 80, 80, 0.2);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        color: #ff8080;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        60% { transform: translateX(6px); }
+    }
+
+    /* ── Footer link ── */
+    .auth-footer-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    .auth-footer-link a {
+        color: var(--cyan-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .auth-footer-link a:hover { color: var(--emerald); }
+
+    /* ── Progress Steps ── */
+    .form-progress {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+        margin-bottom: 1.75rem;
+    }
+
+    .progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border-subtle);
+        transition: all 0.3s ease;
+    }
+
+    .progress-dot.active {
+        background: var(--cyan-primary);
+        box-shadow: 0 0 8px var(--cyan-glow);
+        width: 24px;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 576px) {
+        .register-card { padding: 2rem 1.5rem; }
+        .btn-ems-secondary { display: none; }
+    }
+</style>
+
+<div class="register-page">
+    <div class="register-wrapper">
+        <div class="register-card">
+
+            <!-- Header -->
+            <div class="register-header">
+                <div class="register-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2 class="register-title">Create Account</h2>
+                <p class="register-subtitle">Join the Energy Management System</p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="form-progress">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+            </div>
+
+            <div class="register-divider"></div>
+
+            <!-- Form (workflow unchanged — all Django form fields preserved) -->
+            <form action="{% url 'UserRegisterActions' %}" method="POST" class="register-form">
+                {% csrf_token %}
+
+                <!-- ── Personal Info ── -->
+                <div class="form-section-label"><i class="fas fa-user me-2"></i> Personal Information</div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="id_name" class="form-label-ems">User Name</label>
+                        <div class="input-group-ems field-name">
+                            {{ form.name }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_loginid" class="form-label-ems">Login ID</label>
+                        <div class="input-group-ems field-loginid">
+                            {{ form.loginid }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label-ems">Email</label>
+                        <div class="input-group-ems field-email">
+                            {{ form.email }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_mobile" class="form-label-ems">Mobile</label>
+                        <div class="input-group-ems field-mobile">
+                            {{ form.mobile }}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label for="id_password" class="form-label-ems">Password</label>
+                        <div class="input-group-ems field-password">
+                            {{ form.password }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Location Info ── -->
+                <div class="form-section-label"><i class="fas fa-location-dot me-2"></i> Location Details</div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="id_locality" class="form-label-ems">Locality</label>
+                        <div class="input-group-ems field-locality">
+                            {{ form.locality }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_city" class="form-label-ems">City</label>
+                        <div class="input-group-ems field-city">
+                            {{ form.city }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_state" class="form-label-ems">State</label>
+                        <div class="input-group-ems field-state">
+                            {{ form.state }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_status" class="form-label-ems">Status</label>
+                        <div class="input-group-ems field-status">
+                            {{ form.status }}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label for="id_address" class="form-label-ems">Address</label>
+                        <div class="input-group-ems field-address">
+                            {{ form.address }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="btn-row">
+                    <button type="submit" class="btn-ems-primary">
+                        <i class="fas fa-check-circle"></i>
+                        Create Account
+                    </button>
+                    <button type="reset" class="btn-ems-secondary">
+                        <i class="fas fa-rotate-left me-1"></i> Reset
+                    </button>
+                </div>
+
+                <!-- Django Messages -->
+                {% if messages %}
+                <div class="auth-messages">
+                    {% for message in messages %}
+                    <div class="auth-message">
+                        <i class="fas fa-circle-info me-2"></i>{{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </form>
+
+            <div class="auth-footer-link">
+                Already registered? <a href="{% url 'UserLogin' %}">Login here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

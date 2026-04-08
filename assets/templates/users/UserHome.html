@@ -1,0 +1,351 @@
+{% extends 'users/userbase.html' %}
+{% load static %}
+
+{% block title %}User Home — EMS{% endblock %}
+{% block home_user %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Hero Banner ── */
+    .user-hero {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 28px;
+        padding: 4rem 3.5rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2.5rem;
+        animation: card-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes card-enter {
+        from { opacity: 0; transform: translateY(24px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .user-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--emerald), var(--cyan-primary), var(--emerald));
+        background-size: 200%;
+        animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* decorative circle */
+    .user-hero::after {
+        content: '';
+        position: absolute;
+        right: -80px;
+        top: -80px;
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(16,232,128,0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .hero-greeting {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--emerald);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1.25rem;
+    }
+
+    .hero-greeting .dot {
+        width: 7px; height: 7px;
+        background: var(--emerald);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--emerald-glow);
+        animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+    .hero-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.8rem, 5vw, 3rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.25rem;
+        background: linear-gradient(135deg, #ffffff 30%, var(--emerald) 60%, var(--cyan-primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-text {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.85;
+        max-width: 680px;
+        font-weight: 300;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .btn-action-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        color: var(--navy-900);
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 0.85rem 2rem;
+        border-radius: 30px;
+        border: none;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 25px var(--emerald-glow);
+    }
+
+    .btn-action-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(16,232,128,0.5);
+        color: var(--navy-900);
+        filter: brightness(1.08);
+    }
+
+    .btn-action-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: transparent;
+        border: 1.5px solid var(--border-subtle);
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.82rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 0.85rem 1.8rem;
+        border-radius: 30px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-action-secondary:hover {
+        border-color: rgba(0,200,255,0.35);
+        color: var(--cyan-primary);
+        background: rgba(0,200,255,0.05);
+        transform: translateY(-2px);
+    }
+
+    /* ── Quick Access Cards ── */
+    .qa-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .qa-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 20px;
+        padding: 1.75rem 1.5rem;
+        text-decoration: none;
+        display: block;
+        transition: all 0.35s ease;
+        position: relative;
+        overflow: hidden;
+        animation: card-enter 0.6s ease forwards;
+        animation-delay: var(--delay, 0s);
+        opacity: 0;
+    }
+
+    .qa-card:hover {
+        border-color: rgba(0,200,255,0.25);
+        transform: translateY(-8px);
+        box-shadow: 0 16px 45px rgba(0,0,0,0.4), 0 0 35px var(--cyan-glow);
+    }
+
+    .qa-card-icon {
+        width: 52px; height: 52px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        margin-bottom: 1.2rem;
+        transition: transform 0.35s ease;
+    }
+
+    .qa-card:hover .qa-card-icon { transform: scale(1.15) rotate(-5deg); }
+
+    .qa-card-icon.cyan {
+        background: rgba(0,200,255,0.1);
+        color: var(--cyan-primary);
+        box-shadow: 0 0 18px var(--cyan-glow);
+    }
+
+    .qa-card-icon.emerald {
+        background: rgba(16,232,128,0.1);
+        color: var(--emerald);
+        box-shadow: 0 0 18px var(--emerald-glow);
+    }
+
+    .qa-card-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+
+    .qa-card-desc {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .qa-arrow {
+        position: absolute;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+    .qa-card:hover .qa-arrow {
+        color: var(--cyan-primary);
+        transform: translate(3px, -3px);
+    }
+
+    /* ── Info Row ── */
+    .info-row {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        align-items: center;
+        animation: card-enter 0.6s ease forwards;
+        animation-delay: 0.5s;
+        opacity: 0;
+    }
+
+    .info-stat {
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .info-stat-val {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--cyan-primary);
+        display: block;
+        line-height: 1;
+        margin-bottom: 0.4rem;
+        text-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .info-stat-label {
+        font-size: 0.73rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .info-divider {
+        width: 1px;
+        height: 60px;
+        background: var(--border-subtle);
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+        .user-hero { padding: 2.5rem 2rem; }
+        .info-divider { display: none; }
+        .info-row { padding: 1.5rem; gap: 1rem; }
+    }
+</style>
+
+<!-- Hero -->
+<div class="user-hero mb-4">
+    <div class="hero-greeting">
+        <span class="dot"></span>
+        System Active
+    </div>
+    <h1 class="hero-title">Welcome to<br>User Dashboard</h1>
+    <p class="hero-text">
+        A machine learning model using reinforcement learning and fuzzy logic manages energy in smart buildings. It dynamically selects ventilation devices based on weather conditions to balance user comfort and energy efficiency — promoting sustainable energy use.
+    </p>
+    <div class="hero-actions">
+        <a href="{% url 'prediction' %}" class="btn-action-primary">
+            <i class="fas fa-bolt"></i> Run Prediction
+        </a>
+        <a href="{% url 'DatasetView' %}" class="btn-action-secondary">
+            <i class="fas fa-database"></i> View Dataset
+        </a>
+    </div>
+</div>
+
+<!-- Quick Access -->
+<div class="qa-grid">
+    <a href="{% url 'DatasetView' %}" class="qa-card" style="--delay:0.1s">
+        <div class="qa-card-icon cyan"><i class="fas fa-database"></i></div>
+        <div class="qa-card-title">Dataset</div>
+        <p class="qa-card-desc">Explore the full training dataset with filters and search.</p>
+        <i class="fas fa-arrow-up-right qa-arrow"></i>
+    </a>
+    <a href="{% url 'training' %}" class="qa-card" style="--delay:0.2s">
+        <div class="qa-card-icon emerald"><i class="fas fa-brain"></i></div>
+        <div class="qa-card-title">Training</div>
+        <p class="qa-card-desc">View model training results, accuracy metrics and confusion matrices.</p>
+        <i class="fas fa-arrow-up-right qa-arrow"></i>
+    </a>
+    <a href="{% url 'prediction' %}" class="qa-card" style="--delay:0.3s">
+        <div class="qa-card-icon cyan"><i class="fas fa-bolt"></i></div>
+        <div class="qa-card-title">Predict</div>
+        <p class="qa-card-desc">Input environmental data and get real-time device predictions.</p>
+        <i class="fas fa-arrow-up-right qa-arrow"></i>
+    </a>
+</div>
+
+<!-- Stats Bar -->
+<div class="info-row">
+    <div class="info-stat">
+        <span class="info-stat-val">40%</span>
+        <span class="info-stat-label">Energy Saved</span>
+    </div>
+    <div class="info-divider"></div>
+    <div class="info-stat">
+        <span class="info-stat-val">3×</span>
+        <span class="info-stat-label">Faster Prediction</span>
+    </div>
+    <div class="info-divider"></div>
+    <div class="info-stat">
+        <span class="info-stat-val">99%</span>
+        <span class="info-stat-label">Uptime</span>
+    </div>
+    <div class="info-divider"></div>
+    <div class="info-stat">
+        <span class="info-stat-val">24/7</span>
+        <span class="info-stat-label">Monitoring</span>
+    </div>
+</div>
+{% endblock %}

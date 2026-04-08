@@ -1,0 +1,299 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}Admin Dashboard — EMS{% endblock %}
+{% block admin_home %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Dashboard Hero ── */
+    .admin-hero {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 28px;
+        padding: 4rem 3.5rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2.5rem;
+        animation: card-enter 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+
+    @keyframes card-enter {
+        from { opacity: 0; transform: translateY(24px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .admin-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--cyan-primary), var(--emerald), var(--cyan-primary));
+        background-size: 200%;
+        animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .admin-hero::after {
+        content: '';
+        position: absolute;
+        right: -60px; top: -60px;
+        width: 260px; height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .admin-badge-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .admin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0,200,255,0.08);
+        border: 1px solid rgba(0,200,255,0.2);
+        color: var(--cyan-primary);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 5px 14px;
+        border-radius: 20px;
+    }
+
+    .admin-badge .dot {
+        width: 6px; height: 6px;
+        background: var(--emerald);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--emerald-glow);
+        animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+    .admin-hero-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.8rem, 5vw, 3rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.25rem;
+        background: linear-gradient(135deg, #ffffff 25%, var(--cyan-primary) 55%, var(--emerald) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .admin-hero-text {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.85;
+        max-width: 680px;
+        font-weight: 300;
+        margin-bottom: 2.5rem;
+    }
+
+    .btn-admin-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-dark));
+        color: var(--navy-900);
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 0.85rem 2rem;
+        border-radius: 30px;
+        border: none;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 25px var(--cyan-glow);
+    }
+
+    .btn-admin-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(0,200,255,0.5);
+        color: var(--navy-900);
+        filter: brightness(1.08);
+    }
+
+    /* ── Stat Cards ── */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 20px;
+        padding: 1.75rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.35s ease;
+        animation: card-enter 0.6s ease forwards;
+        animation-delay: var(--delay, 0s);
+        opacity: 0;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(0,200,255,0.25);
+        transform: translateY(-6px);
+        box-shadow: 0 15px 45px rgba(0,0,0,0.4), 0 0 30px var(--cyan-glow);
+    }
+
+    .stat-icon {
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon.cyan { background: rgba(0,200,255,0.1); color: var(--cyan-primary); box-shadow: 0 0 15px var(--cyan-glow); }
+    .stat-icon.emerald { background: rgba(16,232,128,0.1); color: var(--emerald); box-shadow: 0 0 15px var(--emerald-glow); }
+
+    .stat-value {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: block;
+        line-height: 1;
+        margin-bottom: 0.4rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    /* ── Quick Actions ── */
+    .quick-actions {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        padding: 2rem 2.5rem;
+        animation: card-enter 0.6s ease forwards;
+        animation-delay: 0.5s;
+        opacity: 0;
+    }
+
+    .qa-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .qa-title::before {
+        content: '';
+        width: 4px;
+        height: 18px;
+        background: linear-gradient(180deg, var(--cyan-primary), var(--emerald));
+        border-radius: 2px;
+    }
+
+    .qa-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0,200,255,0.06);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-secondary);
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 0.7rem 1.4rem;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin: 0 0.5rem 0.75rem 0;
+    }
+
+    .qa-btn:hover {
+        background: rgba(0,200,255,0.12);
+        border-color: rgba(0,200,255,0.3);
+        color: var(--cyan-primary);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .admin-hero { padding: 2.5rem 2rem; }
+        .quick-actions { padding: 1.5rem; }
+    }
+</style>
+
+<!-- Dashboard Hero -->
+<div class="admin-hero">
+    <div class="admin-badge-row">
+        <div class="admin-badge">
+            <span class="dot"></span> Admin Mode
+        </div>
+        <div class="admin-badge" style="border-color:rgba(16,232,128,0.2); color:var(--emerald); background:rgba(16,232,128,0.07);">
+            <i class="fas fa-circle-check" style="font-size:0.65rem;"></i> System Online
+        </div>
+    </div>
+    <h1 class="admin-hero-title">Admin<br>Control Panel</h1>
+    <p class="admin-hero-text">
+        Manage registered users, monitor system status, and oversee the Energy Management System for Smart Buildings. Activate new accounts and keep the platform running smoothly.
+    </p>
+    <a href="{% url 'ViewRegisteredUsers' %}" class="btn-admin-primary">
+        <i class="fas fa-users"></i> Manage Users
+    </a>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card" style="--delay:0.1s">
+        <div class="stat-icon cyan"><i class="fas fa-users"></i></div>
+        <span class="stat-value">—</span>
+        <span class="stat-label">Total Users</span>
+    </div>
+    <div class="stat-card" style="--delay:0.2s">
+        <div class="stat-icon emerald"><i class="fas fa-circle-check"></i></div>
+        <span class="stat-value">—</span>
+        <span class="stat-label">Active Users</span>
+    </div>
+    <div class="stat-card" style="--delay:0.3s">
+        <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+        <span class="stat-value">—</span>
+        <span class="stat-label">Pending</span>
+    </div>
+    <div class="stat-card" style="--delay:0.4s">
+        <div class="stat-icon emerald"><i class="fas fa-bolt"></i></div>
+        <span class="stat-value">99%</span>
+        <span class="stat-label">Uptime</span>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <div class="qa-title">Quick Actions</div>
+    <div>
+        <a href="{% url 'ViewRegisteredUsers' %}" class="qa-btn">
+            <i class="fas fa-user-list"></i> View Users
+        </a>
+        <a href="{% url 'index' %}" class="qa-btn" style="border-color:rgba(255,80,80,0.2); color:#ff8080;">
+            <i class="fas fa-right-from-bracket"></i> Logout
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,367 @@
+{% extends 'admins/adminbase.html' %}
+{% block title %}User List — EMS Admin{% endblock %}
+{% block user_list %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Page Header ── */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+        animation: fade-in 0.5s ease forwards;
+    }
+
+    @keyframes fade-in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    .page-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .page-header-icon {
+        width: 58px; height: 58px;
+        background: linear-gradient(135deg, rgba(0,200,255,0.12), rgba(16,232,128,0.08));
+        border: 1px solid rgba(0,200,255,0.2);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: var(--cyan-primary);
+        box-shadow: 0 0 22px var(--cyan-glow);
+    }
+
+    .page-header h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.3rem, 4vw, 1.9rem);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.3rem;
+    }
+
+    .page-header p { font-size: 0.83rem; color: var(--text-muted); margin: 0; }
+
+    /* ── User Count Badge ── */
+    .user-count-badge {
+        background: rgba(0,200,255,0.08);
+        border: 1px solid rgba(0,200,255,0.18);
+        border-radius: 12px;
+        padding: 0.6rem 1.2rem;
+        text-align: center;
+    }
+
+    .ucb-num {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--cyan-primary);
+        display: block;
+        line-height: 1;
+    }
+
+    .ucb-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+
+    /* ── Table Card ── */
+    .table-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        overflow: hidden;
+        animation: fade-in 0.6s ease forwards;
+        animation-delay: 0.1s;
+        opacity: 0;
+    }
+
+    .table-card-header {
+        padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        background: rgba(0,200,255,0.025);
+    }
+
+    .table-card-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-card-title .dot {
+        width: 4px; height: 18px;
+        background: linear-gradient(180deg, var(--cyan-primary), var(--emerald));
+        border-radius: 2px;
+    }
+
+    /* ── Table ── */
+    .users-table-wrap { overflow-x: auto; }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .users-table thead th {
+        background: rgba(0,200,255,0.05);
+        color: var(--cyan-primary);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-subtle);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .users-table tbody tr {
+        border-bottom: 1px solid rgba(0,200,255,0.04);
+        transition: background 0.25s ease;
+        animation: row-in 0.4s ease forwards;
+        animation-delay: var(--row-delay, 0s);
+        opacity: 0;
+    }
+
+    @keyframes row-in {
+        from { opacity:0; transform:translateX(-10px); }
+        to   { opacity:1; transform:translateX(0); }
+    }
+
+    .users-table tbody tr:hover {
+        background: rgba(0,200,255,0.04);
+    }
+
+    .users-table tbody td {
+        padding: 14px 18px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        vertical-align: middle;
+    }
+
+    /* ── Row number ── */
+    .row-num {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    /* ── Name Cell ── */
+    .user-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 34px; height: 34px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--navy-900);
+        flex-shrink: 0;
+    }
+
+    /* ── Status Badges ── */
+    .badge-waiting {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(245,158,11,0.1);
+        border: 1px solid rgba(245,158,11,0.25);
+        color: #f59e0b;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .badge-active {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(16,232,128,0.1);
+        border: 1px solid rgba(16,232,128,0.22);
+        color: var(--emerald);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .badge-active .dot, .badge-waiting .dot {
+        width: 5px; height: 5px;
+        border-radius: 50%;
+    }
+
+    .badge-active .dot { background: var(--emerald); box-shadow: 0 0 6px var(--emerald-glow); animation: blink 2s ease-in-out infinite; }
+    .badge-waiting .dot { background: #f59e0b; animation: blink 2s ease-in-out infinite; }
+
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+    /* ── Activate Button ── */
+    .btn-activate {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, var(--cyan-primary), var(--emerald));
+        color: var(--navy-900);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 12px var(--cyan-glow);
+        white-space: nowrap;
+    }
+
+    .btn-activate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,200,255,0.45);
+        color: var(--navy-900);
+        filter: brightness(1.08);
+    }
+
+    .activated-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--emerald);
+        text-shadow: 0 0 8px var(--emerald-glow);
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: var(--border-subtle);
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .users-table thead th, .users-table tbody td { padding: 10px 12px; font-size: 0.78rem; }
+        .user-avatar { display: none; }
+        .table-card-header { padding: 1rem 1.25rem; }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-header-icon"><i class="fas fa-users"></i></div>
+        <div>
+            <h1>Registered Users</h1>
+            <p>Review, manage and activate user accounts</p>
+        </div>
+    </div>
+    <div class="user-count-badge">
+        <span class="ucb-num">{{ data|length }}</span>
+        <span class="ucb-label">Total Users</span>
+    </div>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+    <div class="table-card-header">
+        <div class="table-card-title">
+            <span class="dot"></span>
+            User List
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-muted);">
+            <i class="fas fa-circle-info me-1"></i>Click Activate to grant access
+        </div>
+    </div>
+
+    <div class="users-table-wrap">
+        {% if data %}
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Login ID</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Locality</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in data %}
+                <tr style="--row-delay: {{ forloop.counter0 }}00ms;">
+                    <td><span class="row-num">{{ forloop.counter }}</span></td>
+                    <td>
+                        <div class="user-name-cell">
+                            <div class="user-avatar">{{ user.name|first|upper }}</div>
+                            {{ user.name }}
+                        </div>
+                    </td>
+                    <td>{{ user.loginid }}</td>
+                    <td>{{ user.mobile }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.locality }}</td>
+                    <td>
+                        {% if user.status == 'waiting' %}
+                            <span class="badge-waiting">
+                                <span class="dot"></span>Waiting
+                            </span>
+                        {% else %}
+                            <span class="badge-active">
+                                <span class="dot"></span>Active
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.status == 'waiting' %}
+                            <a class="btn-activate" href="/AdminActivaUsers/?uid={{ user.id }}">
+                                <i class="fas fa-unlock"></i> Activate
+                            </a>
+                        {% else %}
+                            <span class="activated-text">
+                                <i class="fas fa-circle-check"></i> Activated
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
+            <p>No users registered yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

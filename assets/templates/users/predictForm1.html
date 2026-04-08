@@ -1,0 +1,390 @@
+{% extends 'users/userbase.html' %}
+{% load static %}
+
+{% block title %}Predict Device — EMS{% endblock %}
+{% block predict_active %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Predict Page Layout ── */
+    .predict-wrapper {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    /* ── Card ── */
+    .predict-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 28px;
+        padding: 3rem 3rem 2.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: card-enter 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+
+    @keyframes card-enter {
+        from { opacity: 0; transform: translateY(28px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .predict-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--emerald), var(--cyan-primary), var(--emerald));
+        background-size: 200%;
+        animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── Header ── */
+    .predict-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .predict-icon {
+        width: 60px; height: 60px;
+        background: linear-gradient(135deg, rgba(16,232,128,0.12), rgba(0,200,255,0.08));
+        border: 1px solid rgba(16,232,128,0.2);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--emerald);
+        box-shadow: 0 0 25px var(--emerald-glow);
+        flex-shrink: 0;
+        transition: transform 0.4s ease;
+    }
+
+    .predict-card:hover .predict-icon { transform: scale(1.08) rotate(-5deg); }
+
+    .predict-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.3rem;
+        letter-spacing: 0.5px;
+    }
+
+    .predict-subtitle {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    /* ── Result Banner ── */
+    .result-banner {
+        background: rgba(16,232,128,0.08);
+        border: 1px solid rgba(16,232,128,0.2);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: card-enter 0.5s ease forwards;
+    }
+
+    .result-icon {
+        width: 44px; height: 44px;
+        background: rgba(16,232,128,0.12);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--emerald);
+        flex-shrink: 0;
+    }
+
+    .result-label {
+        font-size: 0.73rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.2rem;
+    }
+
+    .result-value {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--emerald);
+        text-shadow: 0 0 15px var(--emerald-glow);
+    }
+
+    /* ── Divider ── */
+    .form-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+        margin: 1.5rem 0;
+    }
+
+    /* ── Form Section Label ── */
+    .field-group-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--cyan-primary);
+        opacity: 0.75;
+        margin: 1.5rem 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .field-group-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border-subtle);
+    }
+
+    /* ── Labels ── */
+    .form-label-ems {
+        font-size: 0.73rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.45rem;
+        display: block;
+    }
+
+    /* ── Input / Select ── */
+    .input-group-ems {
+        position: relative;
+        margin-bottom: 1.25rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        pointer-events: none;
+        transition: color 0.3s ease;
+        z-index: 2;
+    }
+
+    .input-group-ems:focus-within .input-icon { color: var(--emerald); }
+
+    .form-control-ems,
+    .form-select-ems {
+        width: 100%;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 0.82rem 1rem 0.82rem 2.7rem;
+        font-size: 0.92rem;
+        font-family: 'Exo 2', sans-serif;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .form-select-ems {
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a7599' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 2.5rem;
+    }
+
+    .form-select-ems option {
+        background: var(--navy-800);
+        color: var(--text-primary);
+    }
+
+    .form-control-ems::placeholder { color: var(--text-muted); font-style: italic; font-size: 0.85rem; }
+
+    .form-control-ems:focus,
+    .form-select-ems:focus {
+        border-color: var(--emerald);
+        background: rgba(16,232,128,0.03);
+        box-shadow: 0 0 0 3px rgba(16,232,128,0.1);
+        color: #fff;
+    }
+
+    /* ── Range Hint ── */
+    .range-hint {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: -0.9rem;
+        margin-bottom: 1.25rem;
+        padding-left: 2.7rem;
+    }
+
+    /* ── Submit Button ── */
+    .btn-predict {
+        width: 100%;
+        background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+        border: none;
+        border-radius: 14px;
+        padding: 1rem;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 0.92rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--navy-900);
+        cursor: pointer;
+        transition: all 0.35s ease;
+        box-shadow: 0 6px 25px var(--emerald-glow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 0.5rem;
+    }
+
+    .btn-predict:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(16,232,128,0.5);
+        filter: brightness(1.08);
+    }
+
+    .btn-predict:active { transform: translateY(0); }
+
+    /* ── Info Pill ── */
+    .info-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0,200,255,0.05);
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-top: 1.5rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .info-pill i { color: var(--cyan-primary); }
+
+    @media (max-width: 576px) {
+        .predict-card { padding: 2rem 1.5rem; }
+    }
+</style>
+
+<div class="predict-wrapper">
+    <div class="predict-card">
+
+        <!-- Header -->
+        <div class="predict-header">
+            <div class="predict-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div>
+                <h2 class="predict-title">Device Predictor</h2>
+                <p class="predict-subtitle">Enter environmental conditions to predict optimal device usage</p>
+            </div>
+        </div>
+
+        <!-- Result Display -->
+        {% if output %}
+        <div class="result-banner">
+            <div class="result-icon"><i class="fas fa-circle-check"></i></div>
+            <div>
+                <div class="result-label">Prediction Result</div>
+                <div class="result-value">{{ output }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-divider"></div>
+
+        <!-- Form (workflow unchanged) -->
+        <form action="{% url 'prediction' %}" method="POST">
+            {% csrf_token %}
+
+            <!-- Environmental -->
+            <div class="field-group-label"><i class="fas fa-cloud-sun me-1"></i> Environmental Conditions</div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label-ems">Temperature (°C)</label>
+                    <div class="input-group-ems">
+                        <input type="number" name="Temperature" step="0.1" min="-50" max="60"
+                               class="form-control-ems" placeholder="e.g. 24.5" required>
+                        <i class="fas fa-thermometer-half input-icon"></i>
+                    </div>
+                    <div class="range-hint">Range: −50 to 60°C</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-ems">Humidity (%)</label>
+                    <div class="input-group-ems">
+                        <input type="number" name="Humidity" step="0.1" min="0" max="100"
+                               class="form-control-ems" placeholder="e.g. 65.0" required>
+                        <i class="fas fa-droplet input-icon"></i>
+                    </div>
+                    <div class="range-hint">Range: 0 to 100%</div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label-ems">Wind Speed (m/s)</label>
+                    <div class="input-group-ems">
+                        <input type="number" name="Wind_Speed" step="0.1" min="0" max="30"
+                               class="form-control-ems" placeholder="e.g. 3.2" required>
+                        <i class="fas fa-wind input-icon"></i>
+                    </div>
+                    <div class="range-hint">Range: 0 to 30 m/s</div>
+                </div>
+            </div>
+
+            <!-- Temporal -->
+            <div class="field-group-label"><i class="fas fa-clock me-1"></i> Time Settings</div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label-ems">Time of Day</label>
+                    <div class="input-group-ems">
+                        <select name="Time_of_Day" class="form-select-ems" required>
+                            {% for hour in hours %}
+                                <option value="{{ hour }}">{{ hour }}:00</option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-clock input-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-ems">Day of Week</label>
+                    <div class="input-group-ems">
+                        <select name="Day_of_Week" class="form-select-ems" required>
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                        </select>
+                        <i class="fas fa-calendar-week input-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-predict">
+                <i class="fas fa-bolt"></i>
+                Predict Device
+            </button>
+        </form>
+
+        <div class="info-pill">
+            <i class="fas fa-circle-info"></i>
+            The model predicts the optimal device (Window / AC / Fan) based on current conditions using reinforcement learning.
+        </div>
+    </div>
+</div>
+{% endblock %}

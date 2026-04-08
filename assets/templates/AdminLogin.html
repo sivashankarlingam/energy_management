@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Login{% endblock %}
+{% block admin_login %}active{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Auth Page Layout ── */
+    .auth-page {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .auth-wrapper {
+        width: 100%;
+        max-width: 480px;
+        position: relative;
+    }
+
+    /* ── Glow Ring Behind Card ── */
+    .auth-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120%;
+        height: 120%;
+        background: radial-gradient(ellipse, rgba(0, 200, 255, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* ── Auth Card ── */
+    .auth-card {
+        background: rgba(10, 22, 40, 0.92);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        padding: 2.75rem 2.5rem;
+        position: relative;
+        z-index: 1;
+        transition: box-shadow 0.4s ease, border-color 0.4s ease;
+        animation: card-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes card-enter {
+        from { opacity: 0; transform: translateY(30px) scale(0.96); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 24px 24px 0 0;
+        background: linear-gradient(90deg, var(--cyan-primary), var(--emerald));
+    }
+
+    .auth-card:hover {
+        border-color: rgba(0, 200, 255, 0.22);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 50px rgba(0, 200, 255, 0.08);
+    }
+
+    /* ── Card Header ── */
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-icon {
+        width: 68px;
+        height: 68px;
+        background: linear-gradient(135deg, rgba(0, 200, 255, 0.12), rgba(16, 232, 128, 0.08));
+        border: 1px solid rgba(0, 200, 255, 0.2);
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.7rem;
+        color: var(--cyan-primary);
+        margin-bottom: 1.25rem;
+        box-shadow: 0 0 30px var(--cyan-glow);
+        transition: transform 0.4s ease;
+    }
+
+    .auth-card:hover .auth-icon {
+        transform: scale(1.08) rotate(-5deg);
+    }
+
+    .auth-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.4rem;
+        letter-spacing: 1px;
+    }
+
+    .auth-subtitle {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+    }
+
+    /* ── Form Controls ── */
+    .form-label-ems {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .input-group-ems {
+        position: relative;
+        margin-bottom: 1.4rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        pointer-events: none;
+        transition: color 0.3s ease;
+        z-index: 2;
+    }
+
+    .form-control-ems {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.85rem 1rem 0.85rem 2.8rem;
+        font-size: 0.95rem;
+        font-family: 'Exo 2', sans-serif;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .form-control-ems::placeholder {
+        color: var(--text-muted);
+        font-style: italic;
+        font-size: 0.88rem;
+    }
+
+    .form-control-ems:focus {
+        border-color: var(--cyan-primary);
+        background: rgba(0, 200, 255, 0.04);
+        box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.1), inset 0 1px 0 rgba(0, 200, 255, 0.05);
+        color: #fff;
+    }
+
+    .form-control-ems:focus + .input-icon,
+    .input-group-ems:focus-within .input-icon {
+        color: var(--cyan-primary);
+    }
+
+    /* ── Buttons ── */
+    .btn-row {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.75rem;
+    }
+
+    .btn-ems-primary {
+        flex: 1;
+        background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-dark));
+        border: none;
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--navy-900);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px var(--cyan-glow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-ems-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 200, 255, 0.5);
+        filter: brightness(1.08);
+    }
+
+    .btn-ems-primary:active { transform: translateY(0); }
+
+    .btn-ems-secondary {
+        flex: 0 0 auto;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 0.85rem 1.4rem;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ems-secondary:hover {
+        border-color: rgba(0, 200, 255, 0.3);
+        color: var(--cyan-primary);
+        background: rgba(0, 200, 255, 0.05);
+    }
+
+    /* ── Messages ── */
+    .auth-messages {
+        margin-top: 1.25rem;
+    }
+
+    .auth-message {
+        background: rgba(255, 80, 80, 0.08);
+        border: 1px solid rgba(255, 80, 80, 0.2);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        color: #ff8080;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        animation: shake 0.4s ease;
+    }
+
+    /* Check if message is success-type (customize based on your message tags) */
+    .auth-message.success {
+        background: rgba(16, 232, 128, 0.08);
+        border-color: rgba(16, 232, 128, 0.2);
+        color: var(--emerald);
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        60% { transform: translateX(6px); }
+    }
+
+    /* ── Footer Link ── */
+    .auth-footer-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    .auth-footer-link a {
+        color: var(--cyan-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .auth-footer-link a:hover { color: var(--emerald); }
+
+    /* ── Divider ── */
+    .auth-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-subtle), transparent);
+        margin: 1.5rem 0;
+    }
+
+    @media (max-width: 480px) {
+        .auth-card { padding: 2rem 1.5rem; }
+        .btn-ems-secondary { display: none; }
+    }
+</style>
+
+<div class="auth-page">
+    <div class="auth-wrapper">
+        <div class="auth-card">
+
+            <!-- Header -->
+            <div class="auth-header">
+                <div class="auth-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h2 class="auth-title">Admin Portal</h2>
+                <p class="auth-subtitle">Authorized personnel only — Enter your credentials</p>
+            </div>
+
+            <div class="auth-divider"></div>
+
+            <!-- Form (workflow unchanged) -->
+            <form action="{% url 'AdminLoginCheck' %}" method="POST">
+                {% csrf_token %}
+
+                <!-- Admin ID -->
+                <div class="mb-1">
+                    <label for="loginid" class="form-label-ems">Admin ID</label>
+                    <div class="input-group-ems">
+                        <input type="text"
+                               class="form-control-ems"
+                               id="loginid"
+                               name="loginid"
+                               required
+                               placeholder="Enter your Admin ID"
+                               autocomplete="username">
+                        <i class="fas fa-id-badge input-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-1">
+                    <label for="password" class="form-label-ems">Password</label>
+                    <div class="input-group-ems">
+                        <input type="password"
+                               class="form-control-ems"
+                               id="password"
+                               name="pswd"
+                               required
+                               placeholder="Enter your Password"
+                               autocomplete="current-password">
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="btn-row">
+                    <button type="submit" class="btn-ems-primary">
+                        <i class="fas fa-right-to-bracket"></i>
+                        Login
+                    </button>
+                    <button type="reset" class="btn-ems-secondary">
+                        <i class="fas fa-rotate-left"></i>
+                    </button>
+                </div>
+
+                <!-- Django Messages -->
+                {% if messages %}
+                <div class="auth-messages">
+                    {% for message in messages %}
+                    <div class="auth-message {% if message.tags %}{{ message.tags }}{% endif %}">
+                        <i class="fas fa-circle-info me-2"></i>{{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </form>
+
+            <div class="auth-footer-link">
+                Not an admin? <a href="{% url 'UserLogin' %}">User Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
