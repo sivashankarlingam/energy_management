@@ -387,10 +387,10 @@
                                 </span>
                             {% endif %}
                             
-                            <a href="{% url 'AdminEditUser' %}?uid={{ user.id }}" class="btn-icon-admin edit" title="Edit User">
+                            <a href="/AdminEditUser/?uid={{ user.id }}" class="btn-icon-admin edit" title="Edit User">
                                 <i class="fas fa-pen-to-square"></i>
                             </a>
-                            <a href="{% url 'AdminDeleteUser' %}?uid={{ user.id }}" 
+                            <a href="/AdminDeleteUser/?uid={{ user.id }}" 
                                class="btn-icon-admin delete" 
                                title="Delete User"
                                onclick="return confirm('Are you sure you want to delete this user?')">
